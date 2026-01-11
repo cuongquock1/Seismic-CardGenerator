@@ -242,7 +242,7 @@ button {
 
 <div id="welcome-screen">
     <h1>SEISMIC CARD GENERATOR</h1>
-    <button id="start-btn">START</button>
+    <button onclick="startGame()">START</button>
 </div>
 
 <div id="generator-ui">
@@ -287,24 +287,6 @@ const music = document.getElementById('bg-music');
 music.volume = 0.25;
 
 // LẤY NÚT START
-const startBtn = document.getElementById('start-btn');
-
-// KHI BẤM START
-startBtn.addEventListener('click', () => {
-
-    // 1. TẮT MÀN HÌNH CHÀO
-    document.getElementById('welcome-screen').style.display = 'none';
-
-    // 2. BẬT GIAO DIỆN CHÍNH
-    document.getElementById('generator-ui').style.display = 'flex';
-
-    // 3. HIỆN OVERLAY (KHI CHƯA UP ẢNH)
-    document.getElementById('dark-overlay').style.display = 'block';
-
-    // 4. PHÁT NHẠC (GitHub Pages CHO PHÉP)
-    music.currentTime = 0;
-    music.play().catch(() => {});
-});
 
 
 /* ================= UPLOAD ẢNH ================= */
@@ -331,6 +313,20 @@ upload.onchange = e => {
     };
     reader.readAsDataURL(file);
 };
+function startGame() {
+    // 1. Ẩn màn hình chào
+    document.getElementById('welcome-screen').style.display = 'none';
+
+    // 2. Hiện giao diện chính
+    document.getElementById('generator-ui').style.display = 'flex';
+
+    // 3. Hiện overlay chờ upload ảnh
+    document.getElementById('dark-overlay').style.display = 'block';
+
+    // 4. PHÁT NHẠC – CLICK THẬT → GITHUB CHO PHÉP
+    music.currentTime = 0;
+    music.play().catch(() => {});
+}
 </script>
 
 </body>
