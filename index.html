@@ -49,10 +49,6 @@ html, body {
     color: white;
     border: 2px solid #a442f5;
     box-shadow: 0 0 20px #a442f5;
-	<h1>SEISMIC CARD GENERATOR</h1>
-
-    <!-- ✅ NÚT START -->
-    <button id="start-btn" onclick="startGame()">START</button>
 }
 
 button {
@@ -239,14 +235,14 @@ button {
 <body>
 
 <audio id="bg-music" loop>
-    <source src="./nhac.mp3" type="audio/mpeg">
+    <source src="nhac.mp3" type="audio/mpeg">
 </audio>
 
 <div id="game-container">
 
 <div id="welcome-screen">
     <h1>SEISMIC CARD GENERATOR</h1>
-    <button onclick="startGame()">START</button>
+    <button id="start-btn">START</button>
 </div>
 
 <div id="generator-ui">
@@ -284,29 +280,42 @@ button {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
+/* ================= MUSIC + START ================= */
+
+// LẤY NHẠC
 const music = document.getElementById('bg-music');
 music.volume = 0.25;
 
-function startGame(){
+// LẤY NÚT START
+const startBtn = document.getElementById('start-btn');
+
+// KHI BẤM START
+startBtn.addEventListener('click', () => {
+
+    // 1. TẮT MÀN HÌNH CHÀO
     document.getElementById('welcome-screen').style.display = 'none';
+
+    // 2. BẬT GIAO DIỆN CHÍNH
     document.getElementById('generator-ui').style.display = 'flex';
 
-    // ✅ cho phép overlay xuất hiện (khi chưa upload ảnh)
+    // 3. HIỆN OVERLAY (KHI CHƯA UP ẢNH)
     document.getElementById('dark-overlay').style.display = 'block';
-// ✅ NHẠC CHẠY SAU CLICK → GitHub cho phép
-    const music = document.getElementById('bg-music');
-    music.volume = 0.25;
-    music.play().catch(()=>{});
-}
 
-/* Upload ảnh – SET SIZE CHUẨN */
+    // 4. PHÁT NHẠC (GitHub Pages CHO PHÉP)
+    music.currentTime = 0;
+    music.play().catch(() => {});
+});
+
+
+/* ================= UPLOAD ẢNH ================= */
+
 const upload = document.getElementById('upload-pfp');
 const container = document.getElementById('user-image-container');
 const img = document.getElementById('user-image');
 
 upload.onchange = e => {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
 
     const reader = new FileReader();
     reader.onload = ev => {
@@ -317,96 +326,11 @@ upload.onchange = e => {
         container.style.left = '53px';
         container.style.top = '42px';
 
+        // ẨN overlay khi đã có ảnh
         document.getElementById('dark-overlay').style.display = 'none';
     };
-
-    reader.readAsDataURL(file); // ⭐ DÒNG QUAN TRỌNG BỊ THIẾU
+    reader.readAsDataURL(file);
 };
-
-/* Drag & Resize */
-let drag=false, resize=false, sx, sy, sw, sh, sl, st, h;
-
-container.onmousedown = e=>{
-    if(e.target.tagName === 'INPUT') return; // ⭐ QUAN TRỌNG
-
-    sx=e.clientX; sy=e.clientY;
-    sw=container.offsetWidth; sh=container.offsetHeight;
-    sl=container.offsetLeft; st=container.offsetTop;
-
-    if(e.target.classList.contains('resizer')){
-        resize=true; h=e.target;
-    } else drag=true;
-};
-
-window.onmousemove = e=>{
-    if(drag){
-        container.style.left = sl + e.clientX - sx + 'px';
-        container.style.top  = st + e.clientY - sy + 'px';
-    }
-    if(resize){
-        const dx=e.clientX-sx, dy=e.clientY-sy;
-        if(h.classList.contains('br')){
-            container.style.width=sw+dx+'px';
-            container.style.height=sh+dy+'px';
-        }
-    }
-};
-
-window.onmouseup=()=>{drag=false; resize=false};
-
-async function downloadImage() {
-    const wrapper = document.getElementById('pfp-wrapper');
-    
-    // 1. Tạm ẩn các nút điều chỉnh để không bị dính vào ảnh
-    document.querySelectorAll('.resizer').forEach(r => r.style.display = 'none');
-    
-    // 2. Chờ font chữ tải xong hoàn toàn
-    await document.fonts.ready;
-
-    // 3. Chụp ảnh - Cấu hình này giúp ảnh GIỐNG 100% TRÊN WEB
-    html2canvas(wrapper, {
-        backgroundColor: null,
-        scale: 2,           // Tăng độ nét (có thể để 1 nếu muốn nhẹ)
-        useCORS: true,
-        allowTaint: true,
-        
-        // CHỐNG MẤT GÓC: Ép chụp đúng tọa độ của khung wrapper
-        width: 500,
-        height: 700,
-        windowWidth: 500,
-        windowHeight: 700,
-        x: 0,
-        y: 0,
-        scrollX: 0,
-        scrollY: 0,
-
-        onclone: (clonedDoc) => {
-            // Đảm bảo khung trong bản sao không bị dính margin/padding lạ
-            const clonedWrapper = clonedDoc.getElementById('pfp-wrapper');
-            if(clonedWrapper) {
-                clonedWrapper.style.margin = "0";
-                clonedWrapper.style.padding = "0";
-            }
-            // Xóa viền khi đang gõ chữ
-            const name = clonedDoc.getElementById('input-name');
-            const mag = clonedDoc.getElementById('input-magnitude');
-            if(name) name.style.border = 'none';
-            if(mag) mag.style.border = 'none';
-        }
-    }).then(canvas => {
-        // 4. Tạo file ảnh và tải về
-        const link = document.createElement('a');
-        link.download = 'Seismic_PFP_Original.png';
-        link.href = canvas.toDataURL('image/png', 1.0);
-        link.click();
-
-        // 5. Hiện lại các nút điều chỉnh sau khi chụp xong
-        document.querySelectorAll('.resizer').forEach(r => r.style.display = 'block');
-    }).catch(err => {
-        console.error("Lỗi:", err);
-        document.querySelectorAll('.resizer').forEach(r => r.style.display = 'block');
-    });
-}
 </script>
 
 </body>
